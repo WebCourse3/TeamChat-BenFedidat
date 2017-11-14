@@ -8,6 +8,8 @@ import { of } from 'rxjs/observable/of';
 
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map, tap } from 'rxjs/operators';
+import { User } from './user';
+import { CookieService } from 'ngx-cookie-service';
 
 const httpOptions = {
   headers: new HttpHeaders({ 
@@ -18,23 +20,32 @@ const httpOptions = {
 @Injectable()
 export class UserService {
 
-  ngOnInit() {
+  public currentUser: string;
+
+  private getCurrentUser(): void {
+    var username: string = this.cookieService.get("user");
+    if(username)
+      this.currentUser = username;
   }
 
   constructor(
     private http: HttpClient,
-    private messageService: MessageService) { }
+    private messageService: MessageService,
+    private cookieService: CookieService,
+  ) { 
+    this.getCurrentUser();
+  }
     
     /** GET heroes from the server */
     signin (name, password): Observable<string> {
       this.messageService.add('signing in');
       const url = `${this.serverUrl}/signin`;
-      const body =  {name: name, password: password};
-      return this.http.post<string>(url, body, httpOptions)
+      const user =  new User(name, password);
+      return this.http.post<string>(url, user, httpOptions)
         .pipe(
           tap((str: string) => {
             this.log(`signed in ${str}`);
-            
+            this.currentUser = user.id;
           }),
           catchError(this.handleError<string>('signed in'))
         );
@@ -44,7 +55,7 @@ export class UserService {
     signup (name, password): Observable<string> {
       this.messageService.add('signing up');
       const url = `${this.serverUrl}/signup`;
-      const body =  {name: name, password: password};
+      const body =  new User(name, password);
       return this.http.post<string>(url, body, httpOptions)
         .pipe(
           tap((str: string) => this.log(`signed up ${str}`)),

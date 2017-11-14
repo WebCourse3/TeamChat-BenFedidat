@@ -1,6 +1,8 @@
-<p>
-  userlist works!
-</p>
+<h6>User list:</h6>
 
-Here we'll just have a list of users in this room,
-and maybe a list of users permitted in here.
+<ul class="users list-group">
+  <li *ngFor="let user of users" class="list-group-item"
+    [ngClass]="{'active': user.id===currentUser}">
+    <span class="badge">{{user.id}}</span>
+  </li>
+</ul>

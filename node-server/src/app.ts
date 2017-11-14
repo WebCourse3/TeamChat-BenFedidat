@@ -4,6 +4,10 @@ import * as cookieParser from "cookie-parser";
 import * as logger from "morgan";
 import * as errorHandler from "errorhandler";
 import * as path from "path";
+import { Room } from "./model/room";
+import { Message } from "./model/message";
+import { User } from "./model/user";
+import { DummyData } from "./controller/DummyData";
 
 var app = express();
 
@@ -23,18 +27,8 @@ var index = require('./routes/index');
 app.use('/', index);
 var users = require('./routes/users');
 app.use('/', users);
-
-// app.use('/', function(req, res, next){
-//   if(!req.cookies || !req.cookies['user']) {
-//     if(req.url === 'login.html') {
-//       res.redirect('login.html');
-//     }
-//     res.redirect('login.html?redirect=' + req.url);
-//   }
-//   else {
-//     next();
-//   }
-// });
+var rooms = require('./routes/rooms');
+app.use('/', rooms);
 
 app.route('/*').get(function(req, res) { 
   return res.sendFile(path.join(__dirname, "../../angular-client/dist", 'index.html')); 
@@ -49,21 +43,31 @@ io.use(socketCookieParser());
 
 io.on('connection', function(socket: any){
   var user = socket.request.cookies["user"];
+  var roomid = +socket.request._query['roomid'];
+  DummyData.rooms.forEach( room =>{
+    if(room.id === roomid
+      && !room.users.filter(ruser => ruser.id === user).length)
+      room.users.push(new User(user, "***"));
+  });
   console.log('User ' + user + ' connected');
-  socket.broadcast.emit('user connect event', user, 'connected');
+  // socket.broadcast.emit('user connect event', user, 'connected');
   socket.on('disconnect', function(){
     console.log('User ' + user + ' disconnected');
-    io.emit('user connect event', user, 'disconnected');
+    DummyData.rooms.forEach( room =>{
+      if(room.id === roomid)
+        room.users = room.users.filter(ruser => ruser.id !== user);
+    });
+    // io.emit('user connect event', user, 'disconnected');
   });
-  socket.on('chat message', function(msg: string){
+  socket.on('server-message', function(msg: Message, room: Room){
     console.log('chat message: ' + user + ' said \"' + msg + '"');
-    socket.broadcast.emit('chat message', user, msg);
+    socket.broadcast.emit('client-message', msg, room);
   });
 });
 ///END////////////////
 
 app.use(errorHandler());
 
-app.listen(3000, function () {
-  console.log('OfekTwitter')
+http.listen(3000, function () {
+  console.log('Team chat')
 });

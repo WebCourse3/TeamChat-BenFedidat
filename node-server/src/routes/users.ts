@@ -2,15 +2,17 @@ import * as express from "express";
 import * as path from "path";
 var router = express.Router();
 
-let loginInfo: { "username": string, "password": string }[] = [
-    { "username": "admin", "password": "secretpassword" }
+import { User } from '../model/user';
+
+let loginInfo: User[] = [
+    new User("admin", "password")
 ];
 let loggedIn: string[] = [];
 
 router.post('/signin', (req, res) => {
-    var username: string = req.body.name;
+    var username: string = req.body.id;
     var password: string = req.body.password;
-    var userInfo: { "username": string, "password": string } = loginInfo.filter(info => info.username === username)[0];
+    var userInfo:  User = loginInfo.filter(info => info.id === username)[0];
     if (userInfo && userInfo.password === password) {
         loggedIn.push(username);
         res.cookie('user', username, { maxAge: 60 * 60 * 24 * 365 })
@@ -22,11 +24,11 @@ router.post('/signin', (req, res) => {
 });
 
 router.post('/signup', (req, res) => {
-    var username: string = req.body.name;
+    var username: string = req.body.id;
     var password: string = req.body.password;
-    var userInfo: { "username": string, "password": string } = loginInfo.filter(info => info.username === username)[0];
+    var userInfo:  User = loginInfo.filter(info => info.id === username)[0];
     if (!userInfo) {
-        loginInfo.push({ "username": username, "password": password });
+        loginInfo.push(new User(username, password));
         res.send("created user successfully");
     }
     else {

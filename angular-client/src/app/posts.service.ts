@@ -8,6 +8,8 @@ import { of } from 'rxjs/observable/of';
 
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map, tap } from 'rxjs/operators';
+import { Message } from './message';
+import * as io from 'socket.io-client';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -15,50 +17,29 @@ const httpOptions = {
 
 @Injectable()
 export class PostsService {
-
-  ngOnInit() {
-  }
-
-  constructor(
-    private http: HttpClient,
-    private messageService: MessageService) { }
-    
-  /** GET heroes from the server */
-  getMessages (name, password): Observable<string[]> {
-    this.messageService.add('getting messages');
-    const url = `${this.serverUrl}/messages`;
-    const body =  {name: name, password: password};
-    return this.http.get<string[]>(this.serverUrl)
-      .pipe(
-        tap(heroes => this.log(`fetched messages`)),
-        catchError(this.handleError('getMessages', []))
-      );
-  }
-
-  /** Log a HeroService message with the MessageService */
-  private log(message: string) {
-    this.messageService.add('HeroService: ' + message);
-  }
-
   private serverUrl: string = "http://localhost:3000";  // URL to web api
+  private socket;
 
-  /**
-   * Handle Http operation that failed.
-   * Let the app continue.
-   * @param operation - name of the operation that failed
-   * @param result - optional value to return as the observable result
-   */
-  private handleError<T> (operation = 'operation', result?: T) {
-    return (error: any): Observable<T> => {
-    
-      // TODO: send the error to remote logging infrastructure
-      console.error(error); // log to console instead
-    
-      // TODO: better job of transforming error for user consumption
-      this.log(`${operation} failed: ${error.message}`);
-    
-      // Let the app keep running by returning an empty result.
-      return of(result as T);
-    };
+  sendMessage (message: Message): void {
+    this.socket.emit('server-message', message);
+  }
+
+  getMessages(roomid: number): Observable<Message> {
+    let observable = new Observable(observer => {
+      this.socket = io.connect(this.serverUrl, {query: `roomid=${roomid}`});
+      this.socket.on('client-message', (data) => {
+        observer.next(data);    
+      });
+      this.socket.on('user connect event', (data) => {
+        observer.next(data);    
+      });
+      return () => {
+        this.socket.disconnect();
+      };
+    })     
+    return <Observable<Message>>observable;
+  }
+
+  constructor() {
   }
 }

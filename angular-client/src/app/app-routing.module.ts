@@ -5,6 +5,7 @@ import { SigninComponent }   from './signin/signin.component';
 import { SignupComponent }      from './signup/signup.component';
 import { MainchatComponent }  from './mainchat/mainchat.component';
 import { LogoutComponent } from './logout/logout.component' 
+import { PostsComponent } from './posts/posts.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/mainchat', pathMatch: 'full' },
@@ -12,6 +13,7 @@ const routes: Routes = [
   { path: 'signin', component: SigninComponent },
   { path: 'mainchat', component: MainchatComponent },
   { path: 'logout', component: LogoutComponent },
+  { path: 'room/:id', component: PostsComponent },
 ];
  
 @NgModule({

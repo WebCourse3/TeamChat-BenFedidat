@@ -19,6 +19,7 @@ import { PostsService } from './posts.service';
 import { CookieService } from 'ngx-cookie-service';
 import { LogoutComponent } from './logout/logout.component';
 import { PostsComponent } from './posts/posts.component';
+import { RoomService } from './room.service';
 
 @NgModule({
   declarations: [
@@ -42,7 +43,8 @@ import { PostsComponent } from './posts/posts.component';
     MessageService,
     UserService,
     PostsService,
-    CookieService
+    CookieService,
+    RoomService,
   ],
   bootstrap: [AppComponent]
 })
