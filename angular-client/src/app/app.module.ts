@@ -10,6 +10,7 @@ import { UserlistComponent } from './userlist/userlist.component';
 import { MessagesComponent } from './messages/messages.component';
 import { AppRoutingModule } from './/app-routing.module';
 import { MainchatComponent } from './mainchat/mainchat.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { HttpClientModule } from '@angular/common/http';
 
@@ -38,6 +39,7 @@ import { RoomService } from './room.service';
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
+    NgbModule.forRoot(),
   ],
   providers: [
     MessageService,

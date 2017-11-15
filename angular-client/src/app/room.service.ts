@@ -8,19 +8,30 @@ import { of } from 'rxjs/observable/of';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map, tap } from 'rxjs/operators';
 import { User } from './user';
+import { UserService } from './user.service';
 
 @Injectable()
 export class RoomService {
 
   constructor(
     private http: HttpClient,
-    private messageService: MessageService) { }
+    private messageService: MessageService,
+    private userService: UserService) { }
 
   getRooms (): Observable<Room[]> {
     const url = `${this.serverUrl}/rooms`;
     return this.http.get<Room[]>(url).pipe(
       tap(_ => this.log(`fetched rooms`)),
       catchError(this.handleError('getRooms', []))
+    );
+  }
+
+  getUserRooms(): Observable<Room[]> {
+    var userid: string = this.userService.currentUser;
+    const url = `${this.serverUrl}/user/${userid}/rooms`;
+    return this.http.get<Room[]>(url).pipe(
+      tap(_ => this.log(`fetched user's rooms`)),
+      catchError(this.handleError('getUserRooms', []))
     );
   }
 

@@ -10,14 +10,15 @@ import { RoomService } from '../room.service';
 })
 export class RoommanagerComponent implements OnInit {
 
-  constructor(private roomService: RoomService) { }
+  constructor(
+    private roomService: RoomService) { }
   
     ngOnInit() {
       this.getRooms();
     }
   
     getRooms(): void {
-      this.roomService.getRooms()
+      this.roomService.getUserRooms()
           .subscribe(rooms => this.rooms = rooms);
     }
 

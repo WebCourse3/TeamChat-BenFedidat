@@ -52,10 +52,10 @@ export class UserService {
     }
     
     /** GET heroes from the server */
-    signup (name, password): Observable<string> {
+    signup (name, password, teamid): Observable<string> {
       this.messageService.add('signing up');
       const url = `${this.serverUrl}/signup`;
-      const body =  new User(name, password);
+      const body =  {id: name, password: password, teamid: teamid};
       return this.http.post<string>(url, body, httpOptions)
         .pipe(
           tap((str: string) => this.log(`signed up ${str}`)),
